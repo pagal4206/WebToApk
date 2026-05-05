@@ -51,7 +51,7 @@ class BuildJobManager(
 
     fun createJob(request: BuildRequest, uploadedIcon: UploadedIconPayload?): BuildJobSnapshot {
         if (uploadedIcon == null && request.iconUrl.isNullOrBlank()) {
-            throw UserInputException("Icon file upload karo ya icon URL do.")
+            throw UserInputException("Upload an icon file or provide an icon URL.")
         }
         uploadedIcon?.let(::validateUploadedIcon)
 
@@ -149,7 +149,7 @@ class BuildJobManager(
                                     state = JobState.FAILED,
                                     progress = snapshot.progress.coerceAtLeast(1),
                                     step = "Build interrupted",
-                                    errorMessage = "Server restart ya stop hone ki wajah se build interrupt ho gaya.",
+                                    errorMessage = "The build was interrupted because the server restarted or stopped.",
                                     updatedAt = interruptionEntry.timestamp,
                                     logs = (baseLogs + interruptionEntry).takeLast(MAX_LOG_ENTRIES)
                                 )
@@ -323,23 +323,23 @@ class BuildJobManager(
 
     private fun validateUploadedIcon(payload: UploadedIconPayload) {
         if (payload.bytes.size.toLong() > config.maxIconBytes) {
-            throw UserInputException("Uploaded icon ${(config.maxIconBytes / (1024 * 1024)).coerceAtLeast(1)}MB se badi nahi honi chahiye.")
+            throw UserInputException("Uploaded icon must not be larger than ${(config.maxIconBytes / (1024 * 1024)).coerceAtLeast(1)}MB.")
         }
 
         val extension = payload.fileName.substringAfterLast('.', "").lowercase()
         if (extension.isNotBlank() && extension !in setOf("png", "jpg", "jpeg")) {
-            throw UserInputException("Uploaded icon abhi sirf PNG ya JPG/JPEG support karti hai.")
+            throw UserInputException("Uploaded icons currently support only PNG or JPG/JPEG files.")
         }
 
         val decoded = ImageIO.read(payload.bytes.inputStream())
         if (decoded == null) {
-            throw UserInputException("Uploaded icon decode nahi hui. PNG ya JPG/JPEG file use karo.")
+            throw UserInputException("Uploaded icon could not be decoded. Use a PNG or JPG/JPEG file.")
         }
         if (decoded.width <= 0 || decoded.height <= 0) {
-            throw UserInputException("Uploaded icon valid dimensions ke saath aani chahiye.")
+            throw UserInputException("Uploaded icon must have valid dimensions.")
         }
         if (decoded.width > MAX_ICON_DIMENSION || decoded.height > MAX_ICON_DIMENSION) {
-            throw UserInputException("Uploaded icon bahut badi hai. ${MAX_ICON_DIMENSION}x${MAX_ICON_DIMENSION} ke andar rakho.")
+            throw UserInputException("Uploaded icon is too large. Keep it within ${MAX_ICON_DIMENSION}x${MAX_ICON_DIMENSION}.")
         }
     }
 
@@ -425,7 +425,7 @@ class BuildJobManager(
     private fun collectArtifact(job: ManagedJob): Path {
         val artifactSource = job.workspaceRoot.resolve("app/build/outputs/apk/release/app-release.apk")
         if (!artifactSource.exists()) {
-            throw IllegalStateException("Release APK create nahi hua. Build output missing hai.")
+            throw IllegalStateException("The release APK was not created. Build output is missing.")
         }
 
         val artifactName = "${safeArtifactName(job.snapshot.appName)}.apk"
@@ -569,7 +569,7 @@ class BuildJobManager(
 
         if (activeJobs >= config.maxPendingBuilds) {
             throw TooManyRequestsException(
-                message = "Build queue abhi full hai. Thodi der baad dobara try karo.",
+                message = "The build queue is currently full. Please try again shortly.",
                 retryAfterSeconds = 60
             )
         }

@@ -276,12 +276,12 @@ function scheduleSubmitHints() {
   clearSubmitHints();
   submitHintTimers.push(window.setTimeout(() => {
     if (submitButton.disabled) {
-      formMessage.textContent = "Build service prepare ho rahi hai. Ready hote hi request queue me chali jayegi.";
+      formMessage.textContent = "The build service is getting ready. Your request will enter the queue as soon as it is available.";
     }
   }, 3500));
   submitHintTimers.push(window.setTimeout(() => {
     if (submitButton.disabled) {
-      formMessage.textContent = "Remote build environment abhi initialize ho raha hai. Thoda aur wait karein.";
+      formMessage.textContent = "The remote build environment is still initializing. Please wait a little longer.";
     }
   }, 15000));
 }
@@ -294,13 +294,13 @@ form.addEventListener("submit", async (event) => {
   const hasUrl = Boolean(iconUrlInput.value.trim());
 
   if (!hasFile && !hasUrl) {
-    formMessage.textContent = "Icon upload ya icon URL me se ek dena zaroori hai.";
+    formMessage.textContent = "You must provide either an icon upload or an icon URL.";
     return;
   }
 
   submitButton.disabled = true;
   submitButton.textContent = "Submitting...";
-  formMessage.textContent = "Request receive ho gayi hai aur protected build workflow start ho raha hai...";
+  formMessage.textContent = "Request received. Starting the protected build workflow...";
   errorPanel.classList.add("hidden");
   downloadPanel.classList.add("hidden");
   scheduleSubmitHints();
@@ -313,7 +313,7 @@ form.addEventListener("submit", async (event) => {
 
     renderJob(snapshot);
     startPolling(snapshot.id);
-    formMessage.textContent = "Build queued. Progress yahin live update hogi.";
+    formMessage.textContent = "Build queued. Progress will update live here.";
     submitButton.textContent = "Building...";
     clearSubmitHints();
   } catch (error) {

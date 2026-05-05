@@ -56,7 +56,7 @@ class JsonProxyResult:
 
 
 @dataclass
-class HerokuWebConfig:
+class WebConfig:
     service_root: Path
     port: int
     mongo_url: str
@@ -70,7 +70,7 @@ class HerokuWebConfig:
     api_rate_limit_window_seconds: int
 
     @classmethod
-    def from_environment(cls, service_root: Path) -> "HerokuWebConfig":
+    def from_environment(cls, service_root: Path) -> "WebConfig":
         return cls(
             service_root=service_root.resolve(),
             port=parse_positive_int("PORT", parse_positive_int("WEB_PORT", 8080)),
@@ -105,7 +105,7 @@ class ApiRateLimiter:
                 oldest = bucket[0]
                 retry_after_seconds = max(1, (self.window_millis - (now - oldest) + 999) // 1000)
                 raise RateLimitExceededError(
-                    "Rate limit exceed ho gaya. Thodi der baad dobara try karo.",
+                    "Rate limit exceeded. Please try again shortly.",
                     int(retry_after_seconds),
                 )
 
@@ -138,9 +138,9 @@ class MongoPortalStore:
         try:
             self.users.insert_one(document)
         except DuplicateKeyError as error:
-            raise PortalStoreError("Is email se account pehle se bana hua hai.") from error
+            raise PortalStoreError("An account with this email already exists.") from error
         except PyMongoError as error:
-            raise PortalStoreError("MongoDB me account save nahi ho paya.") from error
+            raise PortalStoreError("Could not save the account to MongoDB.") from error
 
         return self._public_user(document)
 
@@ -149,7 +149,7 @@ class MongoPortalStore:
         try:
             document = self.users.find_one({"emailLower": normalize_email(email).lower()})
         except PyMongoError as error:
-            raise PortalStoreError("MongoDB se user lookup nahi ho paya.") from error
+            raise PortalStoreError("Could not look up the user in MongoDB.") from error
 
         if not document or not check_password_hash(document["passwordHash"], password):
             return None
@@ -177,7 +177,7 @@ class MongoPortalStore:
         try:
             self.sessions.insert_one(session_document)
         except PyMongoError as error:
-            raise PortalStoreError("User session create nahi ho paayi.") from error
+            raise PortalStoreError("Could not create the user session.") from error
 
         return raw_token
 
@@ -189,7 +189,7 @@ class MongoPortalStore:
         try:
             session_document = self.sessions.find_one({"tokenHash": token_hash, "expiresAt": {"$gt": now}})
         except PyMongoError as error:
-            raise PortalStoreError("MongoDB se session read nahi ho paayi.") from error
+            raise PortalStoreError("Could not read the session from MongoDB.") from error
 
         if not session_document:
             return None
@@ -197,7 +197,7 @@ class MongoPortalStore:
         try:
             user_document = self.users.find_one({"_id": session_document["userId"]})
         except PyMongoError as error:
-            raise PortalStoreError("MongoDB se logged-in user load nahi ho paya.") from error
+            raise PortalStoreError("Could not load the signed-in user from MongoDB.") from error
 
         if not user_document:
             self.delete_session(raw_token)
@@ -217,7 +217,7 @@ class MongoPortalStore:
         try:
             self.sessions.delete_many({"tokenHash": hash_session_token(raw_token)})
         except PyMongoError as error:
-            raise PortalStoreError("User session delete nahi ho paayi.") from error
+            raise PortalStoreError("Could not delete the user session.") from error
 
     def _ensure_indexes(self) -> None:
         if self._indexes_ready:
@@ -231,7 +231,7 @@ class MongoPortalStore:
                 self.sessions.create_index([("tokenHash", ASCENDING)], unique=True, name="uniq_sessions_token_hash")
                 self.sessions.create_index([("expiresAt", ASCENDING)], expireAfterSeconds=0, name="ttl_sessions_expires_at")
             except PyMongoError as error:
-                raise PortalStoreError("MongoDB indexes create nahi ho paaye.") from error
+                raise PortalStoreError("Could not create MongoDB indexes.") from error
             self._indexes_ready = True
 
     @staticmethod
@@ -246,7 +246,7 @@ class MongoPortalStore:
 
 
 class BuilderProxyClient:
-    def __init__(self, config: HerokuWebConfig) -> None:
+    def __init__(self, config: WebConfig) -> None:
         self.config = config
         self.session = requests.Session()
 
@@ -297,7 +297,7 @@ class BuilderProxyClient:
             else:
                 payload = {}
         except ValueError:
-            payload = {"message": response.text[:500] or "Builder se valid JSON response nahi aayi."}
+            payload = {"message": response.text[:500] or "Builder did not return valid JSON."}
         finally:
             response.close()
 
@@ -316,7 +316,7 @@ class BuilderProxyClient:
             )
         except requests.RequestException as error:
             raise BuilderUnavailableError(
-                "Remote builder se connect nahi ho paya. API URL aur builder service status check karo."
+                "Could not connect to the remote builder. Check the API URL and builder service status."
             ) from error
 
     def _builder_headers(self, extra_headers=None) -> Dict[str, str]:
@@ -338,7 +338,7 @@ class BuilderAvailabilityService:
         if self.proxy_client.is_builder_healthy():
             return
         raise BuilderUnavailableError(
-            "Builder abhi reachable nahi hai. Builder service ko manually start karo aur REMOTE_BUILDER_BASE_URL check karo."
+            "Builder is not reachable yet. Start the builder service manually and check REMOTE_BUILDER_BASE_URL."
         )
 
     def observe_job_list(self, payload: Any) -> None:
@@ -352,13 +352,13 @@ class BuilderAvailabilityService:
 
 
 def create_app(
-    config: Optional[HerokuWebConfig] = None,
+    config: Optional[WebConfig] = None,
     portal_store: Optional[MongoPortalStore] = None,
     proxy_client: Optional[BuilderProxyClient] = None,
     lifecycle_service: Optional[BuilderAvailabilityService] = None,
 ) -> Flask:
     load_env_file(BASE_DIR / ".env")
-    config = config or HerokuWebConfig.from_environment(BASE_DIR)
+    config = config or WebConfig.from_environment(BASE_DIR)
     portal_store = portal_store or MongoPortalStore(config.mongo_url)
     proxy_client = proxy_client or BuilderProxyClient(config)
     lifecycle_service = lifecycle_service or BuilderAvailabilityService(proxy_client)
@@ -487,7 +487,7 @@ def create_app(
                 "login.html",
                 title="Login",
                 form_values=form_values,
-                error="Email ya password sahi nahi hai.",
+                error="Incorrect email or password.",
                 next_target=next_target,
             ), 400
 
@@ -526,7 +526,7 @@ def create_app(
         try:
             user = portal_store.create_user(full_name, email, password)
         except PortalStoreError as error:
-            if "pehle se" in str(error):
+            if "already exists" in str(error):
                 return render_template(
                     "register.html",
                     title="Register",
@@ -621,7 +621,7 @@ def require_authenticated_user() -> Dict[str, str]:
     return user
 
 
-def issue_session_cookie(response: Response, config: HerokuWebConfig, raw_token: str) -> None:
+def issue_session_cookie(response: Response, config: WebConfig, raw_token: str) -> None:
     g.clear_auth_cookie = False
     response.set_cookie(
         config.session_cookie_name,
@@ -645,13 +645,13 @@ def resolve_client_key() -> str:
 
 def validate_registration_form(full_name: str, email: str, password: str, confirm_password: str) -> Optional[str]:
     if len(full_name) < 2 or len(full_name) > 80:
-        return "Full name 2 se 80 characters ke beech hona chahiye."
+        return "Full name must be between 2 and 80 characters."
     if not EMAIL_PATTERN.match(normalize_email(email)):
-        return "Valid email address do."
+        return "Enter a valid email address."
     if len(password) < 8:
-        return "Password kam se kam 8 characters ka hona chahiye."
+        return "Password must be at least 8 characters."
     if password != confirm_password:
-        return "Password aur confirm password match nahi kar rahe."
+        return "Password and confirm password do not match."
     return None
 
 
@@ -713,7 +713,7 @@ def normalize_path(value: str) -> str:
 def require_env(name: str) -> str:
     value = first_non_blank(os.getenv(name))
     if not value:
-        raise RuntimeError(f"{name} environment variable required hai.")
+        raise RuntimeError(f"{name} environment variable is required.")
     return value
 
 

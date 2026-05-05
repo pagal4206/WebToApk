@@ -1,0 +1,26 @@
+{
+  "name": "APK Cloud Launchpad",
+  "description": "Flask portal for a VPS or remote APK builder.",
+  "keywords": [
+    "python",
+    "flask",
+    "apk",
+    "proxy",
+    "mongodb"
+  ],
+  "success_url": "/",
+  "env": {
+    "REMOTE_BUILDER_BASE_URL": {
+      "description": "Public HTTPS API URL of your running VPS/remote APK builder service.",
+      "required": true
+    },
+    "MONGODB_URL": {
+      "description": "MongoDB connection string used for user registration, login, and session storage.",
+      "required": true
+    },
+    "REMOTE_BUILDER_TOKEN": {
+      "description": "Optional but recommended. Must match BUILDER_SHARED_SECRET from the builder VPS if builder auth is enabled.",
+      "required": false
+    }
+  }
+}

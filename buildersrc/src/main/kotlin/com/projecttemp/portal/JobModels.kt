@@ -80,18 +80,18 @@ fun buildRequestFromForm(
     val cleanMinSdk = minSdk?.trim()?.toIntOrNull() ?: 21
 
     if (cleanAppName.isBlank()) {
-        throw UserInputException("App name required hai.")
+        throw UserInputException("App name is required.")
     }
     if (cleanWebsiteUrl.isBlank()) {
-        throw UserInputException("Website URL required hai.")
+        throw UserInputException("Website URL is required.")
     }
     parseWebsiteUri(cleanWebsiteUrl)
     cleanIconUrl?.let(::parseIconUri)
     if (cleanVersionCode < 1) {
-        throw UserInputException("Version code 1 ya usse zyada hona chahiye.")
+        throw UserInputException("Version code must be 1 or greater.")
     }
     if (cleanMinSdk !in 21..36) {
-        throw UserInputException("Min SDK 21 se 36 ke beech hona chahiye.")
+        throw UserInputException("Min SDK must be between 21 and 36.")
     }
     if (cleanApplicationId != null) {
         validateApplicationId(cleanApplicationId)
@@ -125,15 +125,15 @@ private fun parseHttpUri(value: String, fieldLabel: String): URI {
         try {
             URI(value)
         } catch (error: Exception) {
-            throw UserInputException("$fieldLabel valid http:// ya https:// link hona chahiye.")
+            throw UserInputException("$fieldLabel must be a valid http:// or https:// URL.")
         }
 
     val scheme = uri.scheme?.lowercase(Locale.US)
     if (scheme != "http" && scheme != "https") {
-        throw UserInputException("$fieldLabel ko http:// ya https:// se start karo.")
+        throw UserInputException("$fieldLabel must start with http:// or https://.")
     }
     if (uri.host.isNullOrBlank()) {
-        throw UserInputException("$fieldLabel me valid domain ya host hona chahiye.")
+        throw UserInputException("$fieldLabel must include a valid domain or host.")
     }
     return uri
 }
@@ -161,7 +161,7 @@ fun generateApplicationId(websiteUrl: String, appName: String): String {
 fun validateApplicationId(value: String) {
     val pattern = Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$")
     if (!pattern.matches(value)) {
-        throw UserInputException("Application ID valid Android package name jaisa hona chahiye, for example com.example.app.")
+        throw UserInputException("Application ID must look like a valid Android package name, for example com.example.app.")
     }
 }
 
@@ -179,7 +179,7 @@ fun sanitizePackageSegment(value: String, fallback: String): String {
 
 fun normalizeColor(value: String): String {
     if (!value.startsWith("#")) {
-        throw UserInputException("Icon background color hex format me do, like #FFFFFF.")
+        throw UserInputException("Provide the icon background color in hex format, for example #FFFFFF.")
     }
 
     val hex = value.removePrefix("#")
@@ -187,11 +187,11 @@ fun normalizeColor(value: String): String {
         when (hex.length) {
             3 -> hex.map { "$it$it" }.joinToString("")
             6, 8 -> hex
-            else -> throw UserInputException("Icon background color #RGB, #RRGGBB, ya #AARRGGBB format me hona chahiye.")
+            else -> throw UserInputException("Icon background color must use #RGB, #RRGGBB, or #AARRGGBB format.")
         }
 
     if (!normalizedHex.matches(Regex("^[0-9a-fA-F]+$"))) {
-        throw UserInputException("Icon background color me sirf hex digits hone chahiye.")
+        throw UserInputException("Icon background color must contain only hexadecimal digits.")
     }
 
     return "#${normalizedHex.uppercase(Locale.US)}"

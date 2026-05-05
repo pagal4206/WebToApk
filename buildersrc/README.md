@@ -1,8 +1,8 @@
 # APK Builder Standalone
 
-Ye folder standalone Android APK builder API hai. Isko VPS, local Linux machine, ya Windows machine par run kiya ja sakta hai.
+This folder contains a standalone Android APK builder API. You can run it on a VPS, a local Linux machine, or Windows.
 
-## Is folder ke andar kya hai
+## What is in this folder
 
 - `src/`: Javalin build API
 - `template/`: embedded Android WebView APK template
@@ -16,9 +16,9 @@ Ye folder standalone Android APK builder API hai. Isko VPS, local Linux machine,
 - `POST /api/builds`
 - `GET /api/builds/{jobId}/apk`
 
-Uploaded icons ke liye PNG ya JPG/JPEG use karo.
+Use PNG or JPG/JPEG for uploaded icons.
 
-## One command run
+## One-command run
 
 Linux / VPS:
 
@@ -32,7 +32,7 @@ Windows:
 .\start-builder.bat
 ```
 
-Script pehle `.env` read karti hai. Default Linux SDK path `/opt/android-sdk` hai; agar woh nahi milta to `$HOME/android-sdk` try hota hai.
+The script reads `.env` first. The default Linux SDK path is `/opt/android-sdk`; if it does not exist, it falls back to `$HOME/android-sdk`.
 
 ## Manual run from inside this folder
 
@@ -69,14 +69,14 @@ $env:BUILDER_SHARED_SECRET='change-this-secret'
 ## Optional `.env`
 
 ```bash
-cp .env.example .env
+cp builder.env.example .env
 ```
 
 ## Required environment
 
 - Java 17+
 - Android SDK installed
-- `ANDROID_SDK_ROOT` ya `ANDROID_HOME` valid hona chahiye
+- `ANDROID_SDK_ROOT` or `ANDROID_HOME` must point to a valid SDK location
 
 ## Optional environment
 
@@ -93,22 +93,22 @@ BUILDER_SHARED_SECRET=match-this-in-web
 
 ## Production hardening notes
 
-- `BUILDER_SHARED_SECRET` set karo. Isse `/api/*` routes par `X-Builder-Token` header required hoga.
-- Uploaded icon size default `5MB` tak limited hai.
-- Old jobs default `168` hours baad cleanup ho jate hain.
-- Queue bounded hai, isliye overload me new builds `429` return kar sakte hain.
-- Build logs text file me store hote hain: `builder-data/jobs/<job-id>/job.log`.
+- Set `BUILDER_SHARED_SECRET`. This makes the `X-Builder-Token` header required on `/api/*` routes.
+- The default uploaded icon size limit is `5MB`.
+- Old jobs are cleaned up after `168` hours by default.
+- The queue is bounded, so new builds may return `429` during overload.
+- Build logs are stored in `builder-data/jobs/<job-id>/job.log`.
 
 ## VPS deployment
 
 Supported modes:
 
-- `Heroku + VPS`: Heroku web app `https://builder.your-domain.com` builder ko call karegi.
-- `Only VPS`: web app `http://127.0.0.1:8080` builder ko internally call karegi.
+- `Hosted Web + VPS`: a hosted web app calls the builder at `https://builder.your-domain.com`.
+- `Only VPS`: the web app and builder both run on the same VPS, and the web app calls `http://127.0.0.1:8080`.
 
 ### VPS packages
 
-Ubuntu VPS par:
+On Ubuntu:
 
 ```bash
 sudo apt-get update
@@ -133,33 +133,32 @@ sdkmanager --sdk_root=/opt/android-sdk "platform-tools" "platforms;android-36" "
 
 ### App setup
 
-Assumption: repo VPS par `/opt/apk-cloud-launchpad` me rakha jayega.
+Assumption: the repo is stored at `/opt/apk-cloud-launchpad` on the VPS.
 
 ```bash
 sudo useradd --system --create-home --shell /usr/sbin/nologin apkcloud || true
 sudo mkdir -p /opt/apk-cloud-launchpad /etc/apk-cloud-launchpad /var/lib/apk-cloud-launchpad/builder-data
 sudo chown -R apkcloud:apkcloud /opt/apk-cloud-launchpad /var/lib/apk-cloud-launchpad
 sudo -u apkcloud bash -lc 'cd /opt/apk-cloud-launchpad/buildersrc && chmod +x ./gradlew && ./gradlew installDist'
-sudo -u apkcloud bash -lc 'cd /opt/apk-cloud-launchpad/heroku-web && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt'
+sudo -u apkcloud bash -lc 'cd /opt/apk-cloud-launchpad/web && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt'
 ```
 
 ### Env files
 
 ```bash
 sudo cp /opt/apk-cloud-launchpad/buildersrc/builder.env.example /etc/apk-cloud-launchpad/builder.env
-sudo cp /opt/apk-cloud-launchpad/buildersrc/web.env.example /etc/apk-cloud-launchpad/web.env
 sudo nano /etc/apk-cloud-launchpad/builder.env
 sudo nano /etc/apk-cloud-launchpad/web.env
 ```
 
-Only VPS mode me:
+Only VPS mode:
 
 ```text
 REMOTE_BUILDER_BASE_URL=http://127.0.0.1:8080
 REMOTE_BUILDER_TOKEN=same-value-as-BUILDER_SHARED_SECRET
 ```
 
-Heroku + VPS mode me:
+Hosted Web + VPS mode:
 
 ```text
 REMOTE_BUILDER_BASE_URL=https://builder.your-domain.com
@@ -186,7 +185,7 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-Heroku + VPS mode:
+Hosted Web + VPS mode:
 
 ```bash
 sudo cp /opt/apk-cloud-launchpad/buildersrc/nginx-builder-public.conf /etc/nginx/sites-available/apk-builder
@@ -195,7 +194,7 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-HTTPS ke liye:
+### HTTPS
 
 ```bash
 sudo apt-get install -y certbot python3-certbot-nginx

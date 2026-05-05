@@ -140,7 +140,7 @@ private fun enforceBuilderToken(ctx: Context, config: PortalConfig) {
 
     val providedSecret = ctx.header(BUILDER_TOKEN_HEADER)?.trim().orEmpty()
     if (providedSecret != expectedSecret) {
-        throw BuilderAuthException("Builder token missing ya invalid hai.")
+        throw BuilderAuthException("Builder token is missing or invalid.")
     }
 }
 

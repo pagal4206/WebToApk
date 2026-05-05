@@ -33,7 +33,7 @@ if [[ -z "$PYTHON_BIN" ]]; then
   elif command -v python >/dev/null 2>&1; then
     PYTHON_BIN="python"
   else
-    echo "Python is required to run heroku-web."
+    echo "Python is required to run web."
     exit 1
   fi
 fi

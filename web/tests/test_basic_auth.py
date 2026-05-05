@@ -74,7 +74,7 @@ class FakeUnauthorizedProxyClient(FakeProxyClient):
         return type(
             "Result",
             (),
-            {"payload": {"message": "Builder token missing ya invalid hai."}, "status_code": 401},
+            {"payload": {"message": "Builder token is missing or invalid."}, "status_code": 401},
         )()
 
 
@@ -148,7 +148,7 @@ class AuthRoutesTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers.get("X-Portal-Auth-Required"), None)
-        self.assertIn("Builder token missing ya invalid hai.", response.get_data(as_text=True))
+        self.assertIn("Builder token is missing or invalid.", response.get_data(as_text=True))
 
 
 if __name__ == "__main__":

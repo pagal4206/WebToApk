@@ -141,10 +141,10 @@ fun loadIcon(project: Project, source: String): BufferedImage {
             )
 
     if (decoded.width <= 0 || decoded.height <= 0) {
-        throw GradleException("Icon image dimensions invalid hain.")
+        throw GradleException("Icon image dimensions are invalid.")
     }
     if (decoded.width > MAX_ICON_DIMENSION || decoded.height > MAX_ICON_DIMENSION) {
-        throw GradleException("Icon image bahut badi hai. ${MAX_ICON_DIMENSION}x${MAX_ICON_DIMENSION} ke andar rakho.")
+        throw GradleException("Icon image is too large. Keep it within ${MAX_ICON_DIMENSION}x${MAX_ICON_DIMENSION}.")
     }
 
     return decoded
@@ -154,7 +154,7 @@ fun downloadRemoteIcon(source: String): ByteArray {
     val connection =
         URI(source).toURL().openConnection().let {
             it as? HttpURLConnection
-                ?: throw GradleException("Only HTTP(S) icon URLs supported hain.")
+                ?: throw GradleException("Only HTTP(S) icon URLs are supported.")
         }
 
     connection.instanceFollowRedirects = true
@@ -166,17 +166,17 @@ fun downloadRemoteIcon(source: String): ByteArray {
     try {
         val responseCode = connection.responseCode
         if (responseCode !in 200..299) {
-            throw GradleException("Icon URL download fail ho gaya. HTTP $responseCode mila.")
+            throw GradleException("Icon URL download failed. Received HTTP $responseCode.")
         }
 
         val contentLength = connection.contentLengthLong
         if (contentLength > MAX_REMOTE_ICON_BYTES) {
-            throw GradleException("Icon URL file ${(MAX_REMOTE_ICON_BYTES / (1024 * 1024)).coerceAtLeast(1)}MB se badi nahi honi chahiye.")
+            throw GradleException("Icon URL file must not be larger than ${(MAX_REMOTE_ICON_BYTES / (1024 * 1024)).coerceAtLeast(1)}MB.")
         }
 
         val guessedType = connection.contentType?.substringBefore(";")?.trim().orEmpty()
         if (guessedType.isNotBlank() && !guessedType.startsWith("image/")) {
-            throw GradleException("Icon URL image content return nahi kar rahi.")
+            throw GradleException("Icon URL did not return image content.")
         }
 
         return connection.inputStream.use { input ->
@@ -190,14 +190,14 @@ fun downloadRemoteIcon(source: String): ByteArray {
                 }
                 totalRead += read
                 if (totalRead > MAX_REMOTE_ICON_BYTES) {
-                    throw GradleException("Icon URL file ${(MAX_REMOTE_ICON_BYTES / (1024 * 1024)).coerceAtLeast(1)}MB se badi nahi honi chahiye.")
+                    throw GradleException("Icon URL file must not be larger than ${(MAX_REMOTE_ICON_BYTES / (1024 * 1024)).coerceAtLeast(1)}MB.")
                 }
                 output.write(buffer, 0, read)
             }
             output.toByteArray()
         }
     } catch (error: IOException) {
-        throw GradleException("Icon URL download nahi ho saki: ${error.message}", error)
+        throw GradleException("Icon URL could not be downloaded: ${error.message}", error)
     } finally {
         connection.disconnect()
     }
