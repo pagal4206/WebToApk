@@ -53,9 +53,6 @@ class FakePortalStore:
 
 
 class FakeProxyClient:
-    def fetch_jobs(self):
-        return type("Result", (), {"payload": [], "status_code": 200})()
-
     def forward_json_get(self, path):
         return type("Result", (), {"payload": {}, "status_code": 200})()
 
@@ -70,7 +67,7 @@ class FakeProxyClient:
 
 
 class FakeUnauthorizedProxyClient(FakeProxyClient):
-    def fetch_jobs(self):
+    def forward_json_get(self, path):
         return type(
             "Result",
             (),
@@ -80,9 +77,6 @@ class FakeUnauthorizedProxyClient(FakeProxyClient):
 
 class FakeLifecycleService:
     def ensure_builder_ready(self):
-        return None
-
-    def observe_job_list(self, payload):
         return None
 
     def observe_snapshot(self, payload):
@@ -122,7 +116,7 @@ class AuthRoutesTest(unittest.TestCase):
         self.assertIn("portal_session=", response.headers.get("Set-Cookie", ""))
 
     def test_api_requires_login(self):
-        response = self.client.get("/api/builds")
+        response = self.client.get("/api/builds/job-1")
         self.assertEqual(response.status_code, 401)
         self.assertIn("Please sign in", response.get_data(as_text=True))
         self.assertEqual(response.headers.get("X-Portal-Auth-Required"), "1")
@@ -144,7 +138,7 @@ class AuthRoutesTest(unittest.TestCase):
             },
         )
 
-        response = client.get("/api/builds")
+        response = client.get("/api/builds/job-1")
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers.get("X-Portal-Auth-Required"), None)

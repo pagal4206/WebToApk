@@ -262,9 +262,6 @@ class BuilderProxyClient:
         except requests.RequestException:
             return False
 
-    def fetch_jobs(self) -> JsonProxyResult:
-        return self.forward_json_get("/api/builds")
-
     def forward_json_get(self, path: str) -> JsonProxyResult:
         return self._execute_json("GET", path, headers={"Accept": "application/json"})
 
@@ -340,9 +337,6 @@ class BuilderAvailabilityService:
         raise BuilderUnavailableError(
             "Builder is not reachable yet. Start the builder service manually and check REMOTE_BUILDER_BASE_URL."
         )
-
-    def observe_job_list(self, payload: Any) -> None:
-        return None
 
     def observe_snapshot(self, payload: Any) -> None:
         return None
@@ -556,14 +550,6 @@ def create_app(
     @app.get("/favicon.ico")
     def favicon():
         return Response(status=204)
-
-    @app.get("/api/builds")
-    def list_builds():
-        require_authenticated_user()
-        lifecycle_service.ensure_builder_ready()
-        result = proxy_client.fetch_jobs()
-        lifecycle_service.observe_job_list(result.payload)
-        return jsonify(result.payload), result.status_code
 
     @app.get("/api/builds/<job_id>")
     def get_build(job_id: str):

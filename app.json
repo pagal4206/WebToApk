@@ -1,5 +1,5 @@
 {
-  "name": "APK Cloud Launchpad",
+  "name": "Build Portal",
   "description": "Flask portal for a VPS or remote APK builder.",
   "keywords": [
     "python",

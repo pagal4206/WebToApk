@@ -331,8 +331,6 @@ a {
 .hero-badges,
 .section-head,
 .logs-head,
-.recent-item-header,
-.recent-meta,
 .progress-meta,
 .form-actions {
     display: flex;
@@ -516,8 +514,7 @@ a {
 .summary-grid > div,
 .download-panel,
 .error-panel,
-.logs-panel,
-.recent-item {
+.logs-panel {
     border-radius: 20px;
     border: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.78);
@@ -545,8 +542,6 @@ a {
 
 .form-actions,
 .logs-head,
-.recent-item-header,
-.recent-meta,
 .progress-meta {
     justify-content: space-between;
     align-items: center;
@@ -557,8 +552,7 @@ a {
     gap: 0.8rem;
 }
 
-.progress-track,
-.mini-progress {
+.progress-track {
     overflow: hidden;
     border-radius: 999px;
     background: rgba(23, 18, 13, 0.08);
@@ -568,8 +562,7 @@ a {
     height: 16px;
 }
 
-.progress-bar,
-.mini-progress > span {
+.progress-bar {
     height: 100%;
     border-radius: inherit;
     background: linear-gradient(90deg, var(--accent), #ffb44f);
@@ -586,8 +579,6 @@ a {
 }
 
 .progress-meta span,
-.recent-item small,
-.recent-meta,
 .summary-label,
 #logOutput {
     color: var(--ink-soft);
@@ -612,8 +603,7 @@ a {
 
 .download-panel,
 .error-panel,
-.logs-panel,
-.recent-item {
+.logs-panel {
     padding: 1rem;
 }
 
@@ -636,30 +626,6 @@ a {
     line-height: 1.58;
     white-space: pre-wrap;
     word-break: break-word;
-}
-
-.recent-list {
-    display: grid;
-    gap: 0.85rem;
-}
-
-.recent-item strong {
-    display: block;
-}
-
-.recent-item small {
-    display: block;
-    margin-top: 0.2rem;
-}
-
-.mini-progress {
-    margin-top: 0.8rem;
-    height: 10px;
-}
-
-.recent-meta {
-    margin-top: 0.75rem;
-    font-size: 0.86rem;
 }
 
 .hidden {
@@ -691,8 +657,6 @@ a {
     .section-head,
     .form-actions,
     .logs-head,
-    .recent-item-header,
-    .recent-meta,
     .progress-meta {
         flex-direction: column;
         align-items: start;

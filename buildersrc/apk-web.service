@@ -1,5 +1,5 @@
 [Unit]
-Description=APK Cloud Launchpad Web Portal
+Description=Build Portal
 After=network-online.target apk-builder.service
 Wants=network-online.target
 

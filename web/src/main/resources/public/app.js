@@ -24,7 +24,6 @@ const summaryApp = document.getElementById("summaryApp");
 const summaryPackage = document.getElementById("summaryPackage");
 const summaryJob = document.getElementById("summaryJob");
 const logOutput = document.getElementById("logOutput");
-const recentBuilds = document.getElementById("recentBuilds");
 const downloadPanel = document.getElementById("downloadPanel");
 const downloadLink = document.getElementById("downloadLink");
 const errorPanel = document.getElementById("errorPanel");
@@ -34,7 +33,6 @@ let currentJobId = null;
 let pollTimer = null;
 let submitHintTimers = [];
 let currentPreviewObjectUrl = null;
-let recentRefreshCounter = 0;
 
 async function fetchJson(url, options) {
   const response = await fetch(url, options);
@@ -102,23 +100,6 @@ iconUrlInput.addEventListener("input", () => {
   }
 });
 
-function clearChildren(node) {
-  while (node.firstChild) {
-    node.removeChild(node.firstChild);
-  }
-}
-
-function createElement(tagName, className, text) {
-  const element = document.createElement(tagName);
-  if (className) {
-    element.className = className;
-  }
-  if (text !== undefined) {
-    element.textContent = text;
-  }
-  return element;
-}
-
 function renderJob(snapshot) {
   const style = stateStyles[snapshot?.state] || "idle";
   const progress = snapshot?.progress || 0;
@@ -153,66 +134,6 @@ function renderJob(snapshot) {
   }
 }
 
-function renderRecent(list) {
-  clearChildren(recentBuilds);
-
-  if (!list.length) {
-    const emptyCard = createElement("div", "recent-item");
-    emptyCard.append(createElement("strong", "", "No builds yet"));
-    emptyCard.append(createElement("small", "", "Your submitted jobs will appear here."));
-    recentBuilds.append(emptyCard);
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-
-  list.forEach((job) => {
-    const style = (stateStyles[job.state] || "idle");
-    const card = createElement("article", "recent-item");
-    const header = createElement("div", "recent-item-header");
-    const titleWrap = createElement("div");
-    titleWrap.append(createElement("strong", "", job.appName));
-    titleWrap.append(createElement("small", "", job.applicationId));
-    header.append(titleWrap);
-
-    if (job.state === "COMPLETED" && job.artifactFileName) {
-      const download = createElement("a", "ghost-button", "Download");
-      download.href = `/api/builds/${job.id}/apk`;
-      download.download = job.artifactFileName;
-      header.append(download);
-    } else {
-      header.append(createElement("span", `status-badge ${style}`, job.state));
-    }
-
-    const miniProgress = createElement("div", "mini-progress");
-    const miniProgressFill = createElement("span");
-    miniProgressFill.style.width = `${job.progress}%`;
-    miniProgress.append(miniProgressFill);
-
-    const meta = createElement("div", "recent-meta");
-    meta.append(createElement("span", "", job.step));
-    meta.append(createElement("span", "", `${job.progress}%`));
-
-    card.append(header, miniProgress, meta);
-    fragment.append(card);
-  });
-
-  recentBuilds.append(fragment);
-}
-
-async function loadRecent() {
-  try {
-    const jobs = await fetchJson("/api/builds");
-    renderRecent(jobs);
-  } catch (error) {
-    clearChildren(recentBuilds);
-    const errorCard = createElement("div", "recent-item");
-    errorCard.append(createElement("strong", "", "Could not load jobs"));
-    errorCard.append(createElement("small", "", error.message));
-    recentBuilds.append(errorCard);
-  }
-}
-
 function clearPollTimer() {
   if (pollTimer) {
     clearTimeout(pollTimer);
@@ -236,12 +157,6 @@ async function pollCurrentJob() {
   try {
     const snapshot = await fetchJson(`/api/builds/${currentJobId}`);
     renderJob(snapshot);
-    recentRefreshCounter += 1;
-
-    if (recentRefreshCounter >= 3 || snapshot.state === "COMPLETED" || snapshot.state === "FAILED") {
-      recentRefreshCounter = 0;
-      await loadRecent();
-    }
 
     if (snapshot.state === "COMPLETED" || snapshot.state === "FAILED") {
       clearPollTimer();
@@ -262,7 +177,6 @@ async function pollCurrentJob() {
 
 function startPolling(jobId) {
   currentJobId = jobId;
-  recentRefreshCounter = 0;
   clearPollTimer();
   pollCurrentJob();
 }
@@ -325,10 +239,9 @@ form.addEventListener("submit", async (event) => {
 });
 
 refreshButton.addEventListener("click", () => {
-  pollCurrentJob();
-  loadRecent();
+  if (currentJobId) {
+    pollCurrentJob();
+  }
 });
 
 window.addEventListener("beforeunload", clearPreviewObjectUrl);
-
-loadRecent();

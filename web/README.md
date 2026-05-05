@@ -1,6 +1,6 @@
-# APK Cloud Launchpad Web Portal
+# Build Portal
 
-Ye package standalone Flask + MongoDB web portal hai. Isko Heroku par bhi run kar sakte ho aur VPS par bhi.
+This package is a standalone Flask + MongoDB web portal. You can run it on a hosted platform or on a VPS.
 
 - user registration page
 - login page
@@ -9,12 +9,10 @@ Ye package standalone Flask + MongoDB web portal hai. Isko Heroku par bhi run ka
 - remote builder proxy
 - direct builder connection
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/pagal4206/project)
-
 ## Supported deployment modes
 
-- `Heroku + VPS`: ye web portal Heroku par chalega, builder VPS par chalega.
-- `Only VPS`: ye web portal aur builder dono same VPS par chalenge. Web portal internally `http://127.0.0.1:8080` builder ko call karega.
+- `Hosted Web + VPS`: the web portal runs on a hosted platform and the builder runs on a VPS.
+- `Only VPS`: the web portal and builder both run on the same VPS. The web portal calls the builder through `http://127.0.0.1:8080`.
 
 Full VPS guide:
 
@@ -22,15 +20,11 @@ Full VPS guide:
 ../buildersrc/README.md
 ```
 
-## Heroku deploy button
+## Repo-root deploy metadata
 
-Deploy button use karne ke liye is folder ko GitHub repo ke root me rakho. Agar aap manual template URL use karna chahte ho:
+If you want deploy metadata to work from the repository root, keep the root-level wrapper files in sync with this folder.
 
-```text
-https://www.heroku.com/deploy?template=https://github.com/<owner>/<repo>
-```
-
-## `app.json` me kya prompt hoga
+## `app.json` prompts
 
 Required:
 
@@ -39,21 +33,21 @@ REMOTE_BUILDER_BASE_URL=https://your-builder-url
 MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/apk_cloud_launchpad
 ```
 
-Heroku + VPS mode me `REMOTE_BUILDER_BASE_URL` public builder domain hoga, for example:
+In Hosted Web + VPS mode, `REMOTE_BUILDER_BASE_URL` should be the public builder domain, for example:
 
 ```text
 REMOTE_BUILDER_BASE_URL=https://builder.your-domain.com
 ```
 
-Only VPS mode me:
+In Only VPS mode:
 
 ```text
 REMOTE_BUILDER_BASE_URL=http://127.0.0.1:8080
 ```
 
-## Hidden advanced envs
+## Advanced environment variables
 
-Ye `app.json` me prompt nahi hote, lekin manually set kiye ja sakte hain:
+These are not prompted by `app.json`, but you can set them manually:
 
 ```text
 REMOTE_BUILDER_TOKEN=match-builder-shared-secret
@@ -78,7 +72,7 @@ Windows:
 .\start-web.bat https://your-builder-url mongodb+srv://username:password@cluster.mongodb.net/apk_cloud_launchpad
 ```
 
-Ya `.env` file me `REMOTE_BUILDER_BASE_URL` aur `MONGODB_URL` dono set kar do.
+Or set both `REMOTE_BUILDER_BASE_URL` and `MONGODB_URL` in the `.env` file.
 
 Manual run on Linux:
 
@@ -102,20 +96,20 @@ python -m portal_app
 
 ## UI and auth flow
 
-- `/register` par naya user create hota hai
-- `/login` par existing user sign in karta hai
-- `/` sirf authenticated users ke liye protected dashboard hai
-- user sessions MongoDB-backed token system se manage hoti hain
+- `/register` creates a new user
+- `/login` signs in an existing user
+- `/` is a protected dashboard for authenticated users only
+- user sessions are managed through a MongoDB-backed token system
 
 ## Builder behavior
 
-- Web portal builder API ko directly call karta hai
-- Builder service ko aap manually run aur manage karoge
-- `REMOTE_BUILDER_BASE_URL` healthy aur reachable hona chahiye
+- The web portal calls the builder API directly
+- You run and manage the builder service manually
+- `REMOTE_BUILDER_BASE_URL` must be healthy and reachable
 
 ## Runtime notes
 
-- `Procfile` gunicorn ko `portal_app:app` se run karta hai
-- `requirements.txt` me `pymongo` aur `dnspython` added hain taki MongoDB Atlas/SRV URL chale
-- `PORT` Heroku khud set karta hai
-- Frontend browser me render hota hai, isliye source ko 100% hide nahi kiya ja sakta; real protection auth, backend logic, aur secure headers se aati hai
+- `Procfile` runs Gunicorn with `portal_app:app`
+- `requirements.txt` includes `pymongo` and `dnspython` so MongoDB Atlas/SRV URLs work
+- The hosting platform may set `PORT` automatically
+- The frontend renders in the browser, so source code cannot be hidden completely; real protection comes from authentication, backend logic, and secure headers
