@@ -1,0 +1,21 @@
+[Unit]
+Description=APK Cloud Launchpad Builder API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=apkcloud
+Group=apkcloud
+WorkingDirectory=/opt/apk-cloud-launchpad/buildersrc
+EnvironmentFile=/etc/apk-cloud-launchpad/builder.env
+ExecStart=/opt/apk-cloud-launchpad/buildersrc/build/install/buildersrc/bin/buildersrc
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/apk-cloud-launchpad /opt/apk-cloud-launchpad/buildersrc
+
+[Install]
+WantedBy=multi-user.target

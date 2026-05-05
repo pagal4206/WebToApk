@@ -1,0 +1,9 @@
+<resources>
+    <string name="splash_loading">Launching your web app</string>
+    <string name="web_error_title">Website couldn\'t load</string>
+    <string name="web_error_message">Please check your internet connection and try again.</string>
+    <string name="web_error_ssl">A secure connection couldn\'t be established with this website.</string>
+    <string name="web_error_http">The website returned an error (%1$d).</string>
+    <string name="retry">Retry</string>
+    <string name="external_app_missing">No app found to open this link.</string>
+</resources>

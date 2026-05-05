@@ -1,0 +1,21 @@
+[Unit]
+Description=APK Cloud Launchpad Web Portal
+After=network-online.target apk-builder.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=apkcloud
+Group=apkcloud
+WorkingDirectory=/opt/apk-cloud-launchpad/heroku-web
+EnvironmentFile=/etc/apk-cloud-launchpad/web.env
+ExecStart=/opt/apk-cloud-launchpad/heroku-web/.venv/bin/gunicorn portal_app:app --bind 127.0.0.1:8090 --workers 2 --threads 4 --timeout 900 --access-logfile - --error-logfile -
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/apk-cloud-launchpad/heroku-web
+
+[Install]
+WantedBy=multi-user.target
