@@ -3,35 +3,14 @@
 
 {% block body %}
 <main class="auth-shell">
-    <section class="auth-panel auth-panel-brand">
-        <div class="brand-mark">AC</div>
-        <div class="eyebrow">Secure Build Workspace</div>
-        <h1>Login to manage APK builds from one protected portal.</h1>
-        <p class="hero-copy">
-            User accounts are stored in MongoDB, build jobs stay behind authenticated routes, and the dashboard talks
-            directly to your running builder service.
-        </p>
-        <div class="feature-list">
-            <div class="feature-card">
-                <strong>Protected Dashboard</strong>
-                <span>Only logged-in users can submit builds or see status.</span>
-            </div>
-            <div class="feature-card">
-                <strong>Direct Builder</strong>
-                <span>Connect the dashboard to your running builder API with one stable URL.</span>
-            </div>
-            <div class="feature-card">
-                <strong>Professional Delivery</strong>
-                <span>Track progress, review logs, and download APKs from one place.</span>
-            </div>
-        </div>
-    </section>
 
     <section class="auth-panel auth-panel-form">
+
         <div class="auth-header">
+            <h1>Web to Apk</h1>
             <div class="eyebrow">Welcome Back</div>
             <h2>Sign in</h2>
-            <p>Use your registered email and password to open the build dashboard.</p>
+            <p>Use your registered email and password to open the dashboard.</p>
         </div>
 
         {% if error %}
@@ -40,14 +19,17 @@
 
         <form method="post" action="/login" class="auth-form">
             <input type="hidden" name="next" value="{{ next_target or '' }}">
+
             <label class="field">
                 <span>Email Address</span>
                 <input type="email" name="email" value="{{ form_values.email or '' }}" placeholder="you@example.com" required>
             </label>
+
             <label class="field">
                 <span>Password</span>
                 <input type="password" name="password" placeholder="Enter your password" required>
             </label>
+
             <button type="submit" class="primary-button full-width">Login</button>
         </form>
 
@@ -55,6 +37,8 @@
             New here?
             <a href="/register">Create an account</a>
         </p>
+
     </section>
+
 </main>
 {% endblock %}

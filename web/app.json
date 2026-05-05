@@ -1,5 +1,5 @@
 {
-  "name": "Build Portal",
+  "name": "Web To Apk",
   "description": "Flask portal for a VPS or remote APK builder.",
   "keywords": [
     "python",
