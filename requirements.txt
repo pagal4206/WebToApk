@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 -r web/requirements.txt
+=======
+-r heroku-web/requirements.txt
+>>>>>>> 33fa4410c173f06cd657c689d34ef5f5731a8800

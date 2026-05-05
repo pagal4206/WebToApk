@@ -1,14 +1,31 @@
 {
   "name": "APK Cloud Launchpad",
+<<<<<<< HEAD
   "description": "Flask portal for a VPS or remote APK builder.",
   "keywords": [
     "python",
     "flask",
+=======
+  "description": "One-click Heroku Flask portal for a VPS or remote APK builder.",
+  "keywords": [
+    "python",
+    "flask",
+    "heroku",
+>>>>>>> 33fa4410c173f06cd657c689d34ef5f5731a8800
     "apk",
     "proxy",
     "mongodb"
   ],
   "success_url": "/",
+<<<<<<< HEAD
+=======
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+>>>>>>> 33fa4410c173f06cd657c689d34ef5f5731a8800
   "env": {
     "REMOTE_BUILDER_BASE_URL": {
       "description": "Public HTTPS API URL of your running VPS/remote APK builder service.",
@@ -17,10 +34,13 @@
     "MONGODB_URL": {
       "description": "MongoDB connection string used for user registration, login, and session storage.",
       "required": true
+<<<<<<< HEAD
     },
     "REMOTE_BUILDER_TOKEN": {
       "description": "Optional but recommended. Must match BUILDER_SHARED_SECRET from the builder VPS if builder auth is enabled.",
       "required": false
+=======
+>>>>>>> 33fa4410c173f06cd657c689d34ef5f5731a8800
     }
   }
 }
