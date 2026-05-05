@@ -9,7 +9,7 @@ Ye package standalone Flask + MongoDB web portal hai. Isko Heroku par bhi run ka
 - remote builder proxy
 - direct builder connection
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/pagal4206/project)
 
 ## Supported deployment modes
 
