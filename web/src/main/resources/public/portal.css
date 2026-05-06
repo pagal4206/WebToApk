@@ -90,7 +90,8 @@ a {
 .auth-page {
     display: grid;
     place-items: center;
-    padding: 1.25rem;
+    min-height: 100vh;
+    padding: clamp(1rem, 3vw, 2rem);
 }
 
 .auth-shell {
@@ -104,6 +105,7 @@ a {
 .auth-shell.compact {
     grid-template-columns: minmax(0, 640px);
     justify-content: center;
+    align-items: center;
 }
 
 .auth-panel {
@@ -205,7 +207,7 @@ a {
 }
 
 .auth-panel-form.solo {
-    min-height: 320px;
+    min-height: clamp(320px, 58vh, 620px);
 }
 
 .auth-header {
@@ -640,6 +642,10 @@ a {
 }
 
 @media (max-width: 720px) {
+    .auth-page {
+        min-height: auto;
+    }
+
     .dashboard-shell {
         width: min(100% - 1rem, 100%);
         padding-top: 1rem;
